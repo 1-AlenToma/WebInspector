@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "WebInspector",
+    "slug": "WebInspector",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/ficon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/sp.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "./assets/*"
+    ],
+    "packagerOpts": {
+      "assetExts": [
+        "html",
+        "js",
+        "png",
+        "txt"
+      ]
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/ficon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.alentoma.WebInspector"
+    },
+    "web": {
+      "favicon": "./assets/ffavocon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "085357b5-fbf9-4588-8b10-f7ef87511d7f"
+      }
+    },
+    "plugins": [
+      ["expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          },
+          "ios": {}
+        }]
+    ]
+  }
+}
