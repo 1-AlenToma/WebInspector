@@ -19,22 +19,10 @@ import gdata from "../gData";
 import methods from "../methods"
 import WebView from "react-native-webview";
 import { Asset, useAssets } from 'expo-asset';
-import single from "../assets/single"
-let s = single;
-s += "\n"+ `
-if(!window.inspectorloaded){
-window.renderInspector();
-window.inspectorloaded = true;
-}
-`
-const onLoadInjected = `
-if (document.readyState !== 'loading') {
-window.ReactNativeWebView.postMessage('InjectNewCode');
-} else {
-document.addEventListener('DOMContentLoaded', function () {
-window.ReactNativeWebView.postMessage('InjectNewCode');
-});
-}
+import single from "../assets/single";
+const lib = `
+window.debugMode=true;
+${single}
 `;
 export type RefItem = {
 url?:string,
@@ -44,7 +32,7 @@ onScroll?: (value:number) => void;
 }
 export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,height:number,onLoad:Funtion})=> {
 	const r = useRef()
-
+	const [emEnabled, setEmEnabled] = useState(false)
 	const [text, setText] = useState("");
 	const [search, setSearch] =
 	useState(`https://www.google.com/search?q=&oq=&sourceid=chrome-mobile&ie=UTF-8`);
@@ -61,13 +49,15 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 	refItem.url = search;
 	refItem.back = ()=> r.current?.goBack();
 	refItem.forward = ()=> r.current?.goForward()
-
+	useEffect(()=> {
+	injectCode();
+	}, [emEnabled])
 	useEffect(()=>{
 	onLoad();
 	}, [icon])
 
 	const injectCode = ()=>{
-	r.current?.injectJavaScript(s);
+	r.current?.injectJavaScript(emEnabled ? "window.renderInspector()": "window.clearEmulator()");
 	}
 
 	return (<View style={[{
@@ -77,7 +67,7 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 		maxHeight: height,
 		overflow: "hidden"
 		}]}>
-  <View style={[styles.tobBar, {
+  <View style={[styles.tabBar, {
 			width: width
 			}]}>
 			<FontAwesome style={styles.remove} onPress={()=> refItem.remove(refItem.id)} name="remove" size={20} color="red" />
@@ -88,8 +78,8 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 				placeholder="Search or type web address"
 				onSubmitEditing={onSubmit}
 				style={styles.input} value={text} onChangeText={setText} />
-      <TouchableOpacity onPress={injectCode}>
-      <Zocial style={styles.icon} name="html5" size={24} color="#fff" />
+      <TouchableOpacity onPress={()=>setEmEnabled(!emEnabled)}>
+      <Zocial style={styles.icon} name="html5" size={24} color={emEnabled ?"red": "#ffffff"} />
       </TouchableOpacity>
      </View>
   <WebView
@@ -99,24 +89,22 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 			setIcon({uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${nativeEvent.url}`})
 			setText(nativeEvent.url)
 			}}
-			onMessage={ ({ nativeEvent }) => {
-			if (nativeEvent.data === 'InjectNewCode') {
-			injectCode()
-			}
-			}}
 			style={[{
 			width: width,
 			height: height -80
 			}]}
+			onLoadEnd={injectCode()}
 			onOpenWindow={(syntheticEvent) => {
 			const { nativeEvent } = syntheticEvent;
 			const { targetUrl } = nativeEvent
 			setSearch(targetUrl)
 			}}
+			javaScriptEnabledAndroid={true}
+			injectedJavaScriptBeforeContentLoaded={lib}
 			javaScriptEnabled={true}
 			source={{ uri: search}}
 			/>
-  </View>
+		</View>
 	)
 	}
 
@@ -125,10 +113,10 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 	textAlign: "left",
 	minWidth: "100%"
 	},
-	tobBar: {
-	height: 80,
+	tabBar: {
+	height: 50,
 	width: "100%",
-	justifyContent: "flex-start",
+	justifyContent: "center",
 	display: "flex",
 	alignItems: "flex-end",
 	backgroundColor: "#2A272A",
