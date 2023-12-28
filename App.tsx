@@ -5,22 +5,23 @@ import gdata from "./gData";
 import HtmlInspector from "./Elements/HtmlInspector"
 
 export default function App() {
-	gdata.hook("windowSize");
+	gdata.hook("size.screen");
 	useEffect(()=>{
 	const subscription = Dimensions.addEventListener(
 	'change',
 	({window, screen}) => {
-	gdata.screenSize = screen;
-	gdata.windowSize = window;
-	},
+	gdata.size.screen.height = screen.height;
+	gdata.size = {screen, window}
+
+	}
 	);
 	return () => subscription?.remove();
 	}, [])
 	return (
-	<View style={styles.container}>
-      <StatusBar hidden={true} />
-      <HtmlInspector />
-    </View>
+	<>
+	<StatusBar hidden={true} />
+	<HtmlInspector />
+	</>
 	);
 	}
 
@@ -28,7 +29,7 @@ export default function App() {
 	container: {
 	flex: 1,
 	backgroundColor: '#fff',
-	alignItems: "flex-start",
-	justifyContent: "flex-start"
+	alignItems: "flex-end",
+	justifyContent: "flex-end"
 	},
 	});

@@ -16,13 +16,33 @@ TouchableOpacity
 } from "react-native";
 import { Zocial, AntDesign, FontAwesome } from '@expo/vector-icons';
 import gdata from "../gData";
-import methods from "../methods"
+import methods from "../Methods"
 import WebView from "react-native-webview";
 import { Asset, useAssets } from 'expo-asset';
 import single from "../assets/single";
+let LoadingIndicatorView = ()=> {
+return (
+<ActivityIndicator
+	color="#009b88"
+	size="large"
+	style={{
+	flex: 1,
+	justifyContent: 'center',
+	position: "absolute",
+	top: "45%",
+	left: "45%"
+	}}
+	/>
+);
+}
 const lib = `
 window.debugMode=true;
-${single}
+setTimeout(()=>{
+if(!window.renderInspector){
+${single};
+}
+},100)
+true;
 `;
 export type RefItem = {
 url?:string,
@@ -39,13 +59,12 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 	const [icon, setIcon] = useState({uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${search}`})
 	const onSubmit = ()=>{
 	let google = `https://www.google.com/search?q=${text}&oq=${text}&sourceid=chrome-mobile&ie=UTF-8`+ text;
-	if (methods.isValidUrl(text) != "")
+	if (methods.isValidUrl(text))
 	google = text;
 	setSearch(google);
 	}
 
-
-	refItem.icon = icon;
+	
 	refItem.url = search;
 	refItem.back = ()=> r.current?.goBack();
 	refItem.forward = ()=> r.current?.goForward()
@@ -53,11 +72,23 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 	injectCode();
 	}, [emEnabled])
 	useEffect(()=>{
+		refItem.icon= icon.uri;
+		refItem?.onchange(refItem);
 	onLoad();
 	}, [icon])
 
+
 	const injectCode = ()=>{
-	r.current?.injectJavaScript(emEnabled ? "window.renderInspector()": "window.clearEmulator()");
+	r.current?.injectJavaScript(emEnabled ? `window.renderInspector();
+	true;`: `window.clearEmulator();
+	true;`);
+	}
+
+	const messageHandler = async (data:any)=>{
+	let json = JSON.parse(data);
+	if (json.type == "download"){
+	methods.writeFile(json.data).then(()=> alert("file downloaded")).catch(e=> alert(e))
+	}
 	}
 
 	return (<View style={[{
@@ -77,7 +108,8 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 				disableFullscreenUI={true}
 				placeholder="Search or type web address"
 				onSubmitEditing={onSubmit}
-				style={styles.input} value={text} onChangeText={setText} />
+				style={styles.input} value={text}
+				onChangeText={setText} />
       <TouchableOpacity onPress={()=>setEmEnabled(!emEnabled)}>
       <Zocial style={styles.icon} name="html5" size={24} color={emEnabled ?"red": "#ffffff"} />
       </TouchableOpacity>
@@ -93,16 +125,32 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 			width: width,
 			height: height -80
 			}]}
+			onMessage={(event) => {
+			messageHandler(event.nativeEvent.data);
+			}}
+			renderLoading={LoadingIndicatorView}
+			startInLoadingState={true}
 			onLoadEnd={injectCode()}
 			onOpenWindow={(syntheticEvent) => {
 			const { nativeEvent } = syntheticEvent;
 			const { targetUrl } = nativeEvent
 			setSearch(targetUrl)
 			}}
-			javaScriptEnabledAndroid={true}
+			injectedJavaScriptBeforeContentLoadedForMainFrameOnly={true}
 			injectedJavaScriptBeforeContentLoaded={lib}
 			javaScriptEnabled={true}
+			domStorageEnabled={true}
+			mixedContentMode="always"
+			allowsFullscreenVideo={true}
+			allowFileAccessFromFileURLs={true}
+			allowUniversalAccessFromFileURLs={true}
+			allowingReadAccessToURL={true}
+			cacheEnabled={true}
+			allowsLinkPreview={true}
+			originWhitelist={['*']}
+			allowsBackForwardNavigationGestures={true}
 			source={{ uri: search}}
+
 			/>
 		</View>
 	)

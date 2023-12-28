@@ -26,6 +26,7 @@
       "supportsTablet": true
     },
     "android": {
+    	"blockedPermissions":["android.permission.ACCESS_MEDIA_LOCATION"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/ficon.png",
         "backgroundColor": "#ffffff"
@@ -41,6 +42,14 @@
       }
     },
     "plugins": [
+    	[
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       ["expo-build-properties",
         {
           "android": {
