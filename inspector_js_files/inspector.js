@@ -310,6 +310,7 @@
             const item = this[index];
             this.splice(index, 1);
             if (item.remove) item.remove();
+            if (item.disconnect) item.disconnect();
             return this;
         };
 
@@ -542,7 +543,7 @@
             c.forEach(content => {
                 if (typeof content == "string") {
                     let e = document.createElement("div");
-                    e.innerHTML =content;
+                    e.innerHTML = content;
                     content = e;
                 }
 
@@ -751,7 +752,7 @@
         };
     };
 
-    function horizentalMenu(onchange) {
+    function horizentalMenu(onchange, inspector) {
         this.selectedIndex = -1;
         this.tabs = [];
         this.loader = new loader();
@@ -794,12 +795,16 @@
         };
 
         resizEvents.add(() => {
+           // let isf = inspector.emusearch.isFocus;
             if (this.selectedIndex >= 0) {
                 this.content.el.classList.add("disableTr");
                 [9, 8, 7, 5].forEach(() =>
                     this.select(this.selectedIndex, true)
                 );
                 this.content.el.classList.remove("disableTr");
+                /*if (isf) {
+                    inspector.emusearch.container.find("input").el.focus();
+                }*/
             }
         });
 
@@ -831,15 +836,11 @@
                 if (!force && this.selectedIndex == index) return;
                 this.selectedIndex = index;
                 this.resize();
-                //this.content.classList().add("hidden");
+                
                 this.ajust(index);
-                // this.content.val("");
+
                 this.buttonContainer.val("");
                 let tab = this.tabs[index];
-
-                //alert(offset);
-                //this.content.add(tab.content.el);
-                //this.content.show(10);
 
                 this.loader.hide();
                 this.tabsContainer.findAll("taba").forEach((x, i) => {
@@ -864,14 +865,14 @@
         this.itemFound = [];
         this.index = -1;
         this.currentPos = 0;
-
+        this.isFocus = false;
         this.container = new Element("div", {
             className: "emuSearch"
         })
             .add(
                 new Element("input", {
                     type: "text",
-
+                    onfocus: () => (this.isFocus = true),
                     placeholder:
                         "Search By #Id , .Class or attr and text value",
                     onkeyup: e => {
@@ -888,6 +889,7 @@
                 }).event("blur", () => {
                     rItem.menu.container.el.scrollTo(0, 0);
                     rItem.emulator.el.scrollTo(0, 0);
+                    this.isFocus = false;
                 })
             )
             .add(
@@ -902,7 +904,8 @@
                     onclick: () => this.next()
                 })
             );
-        this.clear = () => {
+        this.clear = (all) => {
+        	  if(all !== false)
             this.container.find("input").val("");
             this.index = -1;
             this.currentPos = 0;
@@ -1034,6 +1037,7 @@
     const clearEmulator = async () => {
         while (clearing) await sleep(100);
         try {
+        	  window.HTMLDEVTOOLS = undefined;
             bodyItems.clear();
             htmlDoc.clearEvents();
             createdElements = arrayItem();
@@ -1053,10 +1057,15 @@
         clearing = false;
     };
     async function render() {
+    	  if(window.HTMLDEVTOOLS)
+    	     {
+    	     	 window.HTMLDEVTOOLS.reBuild();
+    	     	 return window.HTMLDEVTOOLS;
+    	     }
         await tryfnAsync(clearEmulator);
         this.insMode = false;
         this.items = new arrayItem();
-        this.menu = new horizentalMenu();
+        this.menu = new horizentalMenu(undefined, this);
         this.files = new arrayItem();
         this.cssValue = new Value(() => {
             if (!this.cssValue.value) {
@@ -1103,7 +1112,7 @@
             return a;
         };
 
-        const emusearch = new emuSearch(this);
+        const emusearch = (this.emusearch = new emuSearch(this));
         const cssTab = {
             content: new Element("fcontainer").add(
                 new Element("pre", {
@@ -1236,9 +1245,9 @@
         this.cn = new Element("emdiv", {
             className: "emiframe",
             position: "fixed",
-            bottom:0,
-            left:0,
-            width:"100vw",
+            bottom: 0,
+            left: 0,
+            width: "100vw",
             zIndex: 998865468999876567
         }).appendTo(document.body);
         bodyItems.add(this.cn);
@@ -1247,20 +1256,28 @@
             width: "100%",
             border: "none",
             position: "relative",
-            display:"table",
+            display: "table",
             zIndex: 998865468999876567
         }).appendTo(cn);
-        this.reBuild = () => {
-            emusearch.clear();
+        this.reBuild = (clearAll) => {
+            emusearch.clear(false);
             this.items = arrayItem();
             this.cssValue.value = undefined;
             createdElements = arrayItem();
             tryfnAsync(async () => {
+                observers = await observers.mapAsync(async (x, i) => {
+                    if (i > 0) {
+                        x.disconnect();
+                        return undefined;
+                    }
+                    return x;
+                });
                 let t = await this.build(document.documentElement);
                 content.el.onscroll = undefined;
                 content.val("");
                 content.add(t);
                 this.scrollToPosition(this.y);
+                emusearch.search();
             });
         };
 
@@ -1358,7 +1375,7 @@
 
         const content = new Element("emcontent").appendTo(htmlTab.content);
         this.cn.resizable(this.menu.tabsContainer, () => this.menu.resize());
-        
+
         this.menu.loader.show();
         this.menu.ajust(0);
         onFetchCalled = d => renderFetch(d);
@@ -1490,6 +1507,36 @@
 
             return data;
         };
+
+        const assign_attr_ob = (html, parent) => {
+            let h = html;
+
+            observers.add(
+                new MutationObserver(record => {
+                    let p = content.find("#" + parent.el.id);
+                    let attrs = this.attr(h);
+
+                    [...p.el.children].forEach(x => {
+                        if (x.tagName.toLowerCase() === "emattr") x.remove();
+                    });
+                    let start = undefined;
+                    for (let i = 0; i < p.el.childNodes.length; i++) {
+                        const n = p.el.childNodes[i];
+                        if (n.nodeValue == ">" || n.nodeValue == "/>") {
+                            start = n;
+                            break;
+                        }
+                    }
+
+                    attrs.forEach(x => p.el.insertBefore(x, start));
+                })
+            );
+            observers.last().observe(h, {
+                attributes: true,
+                childList: false,
+                subtree: false
+            });
+        };
         this.textNodes = html => {
             let tg = html.tagName.trim().toLowerCase();
             for (let i = 0; i < html.childNodes.length; i++) {
@@ -1505,8 +1552,8 @@
             return null;
         };
         this.build = async (html, nivo) => {
-           /* if (html && html.classList && html.classList.contains("emElement"))
-                return undefined;*/
+            if (html && html.classList && html.classList.contains("emElement"))
+                return undefined;
             if (nivo === undefined) nivo = 0;
             if (
                 !html ||
@@ -1528,18 +1575,23 @@
             const tagStart = new Element("emtag", {
                 id: id
             });
-            tagStart.val(`&lt;${html.tagName.toLowerCase()}`);
+
+            tagStart.add(
+                document.createTextNode(`<${html.tagName.toLowerCase()}`)
+            );
             attrs.forEach(x => tagStart.add(x));
             if (chl.length > 0 || text) {
                 const childContent = new Element("emchild", {
                     className: text ? "childtxt" : ""
                 });
                 if (text) childContent.add(text);
-                tagStart.el.innerHTML += "&gt;";
+                tagStart.add(document.createTextNode(">"));
                 childContent.add(...chl);
                 tagStart.add(childContent);
-                tagStart.el.innerHTML += `&lt;/${html.tagName.toLowerCase()}&gt;`;
-            } else tagStart.el.innerHTML += "/&gt;";
+                tagStart.add(
+                    document.createTextNode(`</${html.tagName.toLowerCase()}>`)
+                );
+            } else tagStart.add(document.createTextNode("/>"));
             this.items.add({
                 a: tagStart,
                 html,
@@ -1565,32 +1617,36 @@
                 if (item.tagName !== "EMTAG") item = item.closest("emtag");
                 this.cssValue.value = item.id;
             });
-
+            assign_attr_ob(html, tagStart);
             return tagStart;
         };
         await tryfnAsync(async () => {
             // await sleep(5000);
             let observerTimer = undefined;
-            await content.add(await this.build(document.documentElement));
 
             observers.add(
                 new MutationObserver(record => {
                     clearTimeout(observerTimer);
                     observerTimer = setTimeout(() => {
                         for (let r of record) {
-                            if (r.target.classList.contains("emElement"))
+                            if (
+                                r.target.classList.contains("emElement") ||
+                                r.target.closest("emElement")
+                            )
                                 return;
                         }
+
                         this.reBuild();
                     }, 600);
                 })
             );
 
             observers.last().observe(document.body, {
-                attributes: true,
+                attributes: false,
                 childList: true,
                 subtree: true
             });
+            await content.add(await this.build(document.documentElement));
             this.scrollToPosition(0);
         });
         await tryfnAsync(async () => {
@@ -1600,7 +1656,7 @@
             await renderFetch();
         });
 
-        // alert("done");
+				window.HTMLDEVTOOLS = this;
         this.menu.loader.hide();
     }
 
@@ -1610,10 +1666,13 @@
     let windowWidth = window.screen.width;
     window.onresize = e => {
         if (windowWidth == window.screen.width) return;
-        windowWidth = window.screen.width;
+        if (window.debugMode)
+            console.log("window width", windowWidth, window.screen.width);
+
         clearTimeout(resizeTimer);
         //alert(5);
         resizeTimer = setTimeout(() => {
+            windowWidth = window.screen.width;
             resizEvents.forEach(x => tryfn(x));
         }, 300);
     };

@@ -51,9 +51,12 @@ const lib = `
 window.debugMode=true;
 setTimeout(()=>{
 if(!window.renderInspector){
+let style = document.createElement("style");
+style.innerHTML =".emiframe {max-height:80vh  !important; width:100vw !important; bottom:0px !important;}";
 ${single};
+document.head.appendChild(style);
 }
-},100)
+},30)
 true;
 `;
 export type RefItem = {
