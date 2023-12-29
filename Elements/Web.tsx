@@ -62,30 +62,40 @@ back?: Function,
 forward?:Function,
 onScroll?: (value:number) => void;
 }
-export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,height:number,onLoad:Funtion})=> {
+export default (
+	{
+	refItem,
+	width,
+	height,
+	onLoad
+	}: {refItem: RefItem, width: number, height: number, onLoad: Funtion})=> {
 	const r = useRef();
 	const timer = useRef();
 	const { showActionSheetWithOptions } = useActionSheet();
 
-	const animatedValues = useRef({})
+	const animatedValues = useRef({v0: {}, v1: {}})
 	const [emEnabled, setEmEnabled] = useState(false);
 	const [focusIn, setFocusIn] = useState();
 	const [text, setText] = useState("");
+	const [data, setData] = useState([]);
+	const [kStatus, setkStatus] = useState(false);
 	const [search, setSearch] =
 	useState(`https://www.google.com/search?q=&oq=&sourceid=chrome-mobile&ie=UTF-8`);
 	const [icon, setIcon] = useState({uri: `https://s2.googleusercontent.com/s2/favicons?domain_url=${search}`});
 
 
 
-	const onSubmit = ()=>{
-	let google = `https://www.google.com/search?q=${text}&oq=${text}&sourceid=chrome-mobile&ie=UTF-8`+ text;
-	if (methods.isValidUrl(text))
-	google = text;
+	const onSubmit = (txt)=>{
+	txt = text || txt;
+	let google = `https://www.google.com/search?q=${txt}&oq=${txt}&sourceid=chrome-mobile&ie=UTF-8`+ txt;
+	if (methods.isValidUrl(txt))
+	google = txt;
 	setSearch(google);
+	Keyboard.dismiss();
 	}
 
 	const showMenu = () => {
-	const options = ['Privacy Policy', 'About', 'Cancel'];
+	const options = ['Privacy Policy', 'GitHub', 'Cancel'];
 	const destructiveButtonIndex = 0;
 	const cancelButtonIndex = 2;
 	const icons = [
@@ -100,12 +110,12 @@ export default ({refItem,width,height,onLoad}:{refItem:RefItem,width:number,heig
 	icons
 	}, (selectedIndex: number) => {
 	switch (selectedIndex) {
-case 1:
-	// Save
+case 0:
+	Linking.openURL("https://htmlpreview.github.io/?https://raw.githubusercontent.com/1-AlenToma/WebInspector/master/assets/Privacy.html");
 	break;
 
-case destructiveButtonIndex:
-	// Delete
+case 1:
+	Linking.openURL("https://github.com/1-AlenToma/WebInspector");
 	break;
 
 case cancelButtonIndex:
@@ -122,7 +132,7 @@ case cancelButtonIndex:
 	}, [emEnabled])
 
 	useEffect(()=>{
-	if (focusIn)
+	if (focusIn && text.length > 0 && !methods.isValidUrl(text))
 	fetchData();
 	}, [text])
 
@@ -132,12 +142,43 @@ case cancelButtonIndex:
 	onLoad();
 	}, [icon])
 
+	useEffect(()=>{
+	const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+	setkStatus(true);
+	});
+	const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+	setkStatus(false);
+	});
+
+	return ()=> {
+	hideSubscription.remove();
+	showSubscription.remove();
+	}
+	}, [])
+
+	useEffect(()=>{
+	if (focusIn && kStatus){
+	animatedValues.current.v0.show();
+	animatedValues.current.v1.show();
+	} else {
+	animatedValues.current.v0.hide();
+	animatedValues.current.v1.hide();
+	}
+	}, [focusIn, kStatus])
+
 	const fetchData = async ()=>{
 	clearTimeout(timer.current);
-	let url = `http://suggestqueries.google.com/complete/search?client=chrome&q=${text}`;
 	timer.current = setTimeout(async ()=>{
-	let data = await fetch(url);
-	console.log(data);
+	try{
+	let t = text;
+	let url = `http://suggestqueries.google.com/complete/search?client=chrome&q=${t}`;
+	let res = await fetch(url);
+	let json = await res.json();
+	setData((json)[1]);
+	}catch(e){
+	console.error(e);
+	alert(e);
+	}
 	}, 100)
 	}
 
@@ -154,13 +195,9 @@ case cancelButtonIndex:
 	}
 	}
 
-	useEffect(()=>{
-	if (focusIn)
-	animatedValues.current.show();
-	else animatedValues.current.hide();
-
-	}, [focusIn])
-	animatedValues.current.width = methods.proc(90, width)
+	animatedValues.current.v0.width = methods.proc(90, width);
+	animatedValues.current.v1.height = height;
+	let status = (focusIn === true && kStatus === true);
 	return (<View style={[{
 		zIndex: 5,
 		width: width,
@@ -172,7 +209,7 @@ case cancelButtonIndex:
 			width: width,
 			zIndex: 11
 			}]}>
-		  <AnimatedView style={{width: "50%"}} refItem={animatedValues.current}>
+		  <AnimatedView style={{width: "50%"}} refItem={animatedValues.current.v0}>
      <TextInput
 				onFocus={()=> setFocusIn(true)}
 				onBlur={()=> setFocusIn(false)}
@@ -185,7 +222,7 @@ case cancelButtonIndex:
 				onChangeText={setText} />
 				</AnimatedView>
 				{
-			focusIn ? null:
+			status ? null:
 			<View style={styles.buttons}>
 			<TouchableOpacity style={styles.icon} onPress={()=> refItem.remove(refItem.id)}>
 				<FontAwesome name="remove" size={24} color="red" />
@@ -199,19 +236,29 @@ case cancelButtonIndex:
       </View>
 			}
      </View>
-      <TouchableOpacity style={[styles.tabBar, {
-			...(focusIn?{
-			width: "100%",
-			position: "absolute",
-			height: "100%",
-			alignItems: "flex-start",
+      <AnimatedView status={status} style={[
+			{
+			paddingTop: 80,
 			zIndex: 10,
-			left: 0,
-			}: {display: "none"})
-			}]} onPress={()=>{
-			setFocusIn(false);
-			Keyboard.dismiss()
-			}} />
+			overflow: "hidden",
+			position: "absolute",
+			width: "100%",
+			alignItems: "flex-start",
+			backgroundColor: "#2A272A",
+			zIndex: 10,
+			left: 0
+			}]} refItem={animatedValues.current.v1}>
+			{
+			data?.map((x,i)=>(
+			<TouchableOpacity style={styles.link} key={i} onPress={()=>{
+				setText(x);
+				onSubmit(x);
+				}}>
+				 <Text style={styles.txt}>{x}</Text>
+				</TouchableOpacity>
+			))
+			}
+			</AnimatedView>
   <WebView
 			ref={r}
 			onLoad={(syntheticEvent) => {
@@ -252,7 +299,7 @@ case cancelButtonIndex:
 
 			// blocked blobs
 			if (request.url.startsWith("blob")){
-			Alert.alert("Link cannot be opened.");
+			alert("Link cannot be opened.");
 			return false;
 			}
 
@@ -298,7 +345,10 @@ case cancelButtonIndex:
 	const styles = StyleSheet.create({
 	txt: {
 	textAlign: "left",
-	minWidth: "100%"
+	minWidth: "100%",
+	color: "#ffffff",
+	fontSize: 13,
+	fontWeight: "bold",
 	},
 	tabBar: {
 	height: 50,
@@ -309,6 +359,17 @@ case cancelButtonIndex:
 	backgroundColor: "#2A272A",
 	flexDirection: "row",
 	overflow: "hidden"
+	},
+
+	link: {
+	paddingLeft: 5,
+	width: "100%",
+	height: 30,
+	borderBottomColor: "#6e6e6ecc",
+	borderBottomWidth: 1,
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center"
 	},
 
 	icon: {

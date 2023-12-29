@@ -2,31 +2,44 @@ import {Animated } from "react-native";
 import {useState, useEffect, useRef} from "react";
 import gdata from "../gData"
 
-export default ({children,style,refItem}:any)=> {
+export default ({
+	children,
+	style,
+	refItem,
+	speed, 
+	status
+	}: any)=> {
 	const [size, setSize] = useState({});
 	const [animWidth, setAnimWidth] = useState();
 	const [animHeight, setAnimHeight] = useState();
+	const [isAnimate, setIsAnimate] = useState(false)
 	let animated = useRef(false);
 	let init = useRef(false);
 
-	let toggle = (show)=> {
+	let toggle = async (show)=> {
 	if (show === animated.current)
 	return;
 	animated.current = show;
 	init.current = true;
-	if (typeof refItem.width === "number" && animWidth)
+
+	if (typeof refItem.width === "number" && animWidth){
+	//wait setIsAnimate(true);
 	Animated.timing(animWidth, {
 	toValue: !show ? size.width: refItem.width,
-	duration: 200,
+	duration: speed || 500,
 	useNativeDriver: false,
-	}).start();
+	}).start(()=> setIsAnimate(false));
 
-	if (typeof refItem.height === "number" && animHeight)
+	}
+
+	if (typeof refItem.height === "number" && animHeight){
+	//await setIsAnimate(true);
 	Animated.timing(animHeight, {
 	toValue: !show ? size.height: refItem.height,
-	duration: 200,
+	duration: speed || 500,
 	useNativeDriver: false,
-	}).start();
+	}).start(()=> setIsAnimate(false));
+	}
 	}
 
 	refItem.show = ()=> toggle(true);
@@ -35,9 +48,11 @@ export default ({children,style,refItem}:any)=> {
 	setAnimWidth(null);
 	setAnimHeight(null);
 	}, "screen")
-
+	
+	if(status == false && !isAnimate && size.height !== undefined)
+	  return null;
 	return (
-	<Animated.View style={[style, {
+	<Animated.View style={[...(Array.isArray(style) ? style: [style]), {
 		...(typeof refItem.height === "number" && animHeight ? {height: animHeight}: {}),
 		...(typeof refItem.width === "number" && animWidth ? {width: animWidth}: {})
 		}]} onLayout={(event) => {
