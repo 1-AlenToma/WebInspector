@@ -13,7 +13,8 @@ ActivityIndicator,
 StyleSheet,
 button,
 TouchableOpacity,
-Image
+Image,
+BackHandler
 } from "react-native";
 import uuid from 'react-native-uuid';
 import { Zocial, Ionicons, Foundation} from '@expo/vector-icons';
@@ -29,8 +30,8 @@ export default ()=> {
 	gdata.sites.push({
 	icon: "https://s2.googleusercontent.com/s2/favicons?domain_url=www.google.com",
 	remove: (id)=>{
-		gdata.sites.slice(gdata.sites.findIndex(x=> x.id === id), 1);
-		setIndex();
+	gdata.sites.slice(gdata.sites.findIndex(x=> x.id === id), 1);
+	setIndex();
 	},
 	id: uuid.v4()
 	});
@@ -48,7 +49,11 @@ export default ()=> {
 	}
 
 	useEffect(()=>{
+	let backHandlerv = BackHandler.addEventListener("hardwareBackPress", ()=>{ current()?.back();
+	  return true;
+	})
 	add();
+	return ()=> backHandlerv.remove();
 	}, [])
 	return (<>
 	<View style={[styles.folder, {

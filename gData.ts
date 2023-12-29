@@ -1,5 +1,6 @@
 import GlobalState from "react-global-state-management";
 import { Dimensions } from "react-native";
+const events =[];
 const data = GlobalState(
     {
         size: {

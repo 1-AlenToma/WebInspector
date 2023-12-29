@@ -14,9 +14,11 @@ const isValidUrl = urlString => {
     ); // validate fragment locator
     return !!urlPattern.test(urlString);
 };
-
+let settings = null;
 const getDirectoryPermissions = async => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => { 
+    	  if (settings !== null)
+    	     return settings;
         try {
             const initial =
                 FileSystem.StorageAccessFramework.getUriForDirectoryInRoot();
@@ -25,7 +27,7 @@ const getDirectoryPermissions = async => {
                 await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(
                     initial
                 );
-            let settings = {
+             settings = {
                 downloadsFolder: permissions.granted
                     ? permissions.directoryUri
                     : null
@@ -76,7 +78,12 @@ const writeFile = async text => {
     }
 };
 
+function proc(partialValue, totalValue) {
+   return (partialValue / 100) * totalValue;
+} 
+
 export default {
     isValidUrl,
-    writeFile
+    writeFile,
+    proc
 };
