@@ -10,4 +10,8 @@ It also let you track html object with a simple click on the object.
 
 This is simple chrome devtools like for mobile.
 
-The code is open source, feel free to work with me to make it better if you got the time
+The code is open source, feel free to work with me to make it better if you got the time.
+
+![screenshot](https://raw.githubusercontent.com/1-AlenToma/WebInspector/master/assets/Screenshot.png)
+
+
