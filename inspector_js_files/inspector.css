@@ -1,0 +1,580 @@
+
+
+
+emulator.inspector {
+  width: 100%;
+  height: 100%;
+  border-top: 1px solid gray;
+  position: relative;
+  background: #ffffff;
+  display: block;
+}
+
+.emiframe {
+  width: 100vw;
+  height: 40vh;
+  border-top: 1px solid gray;
+  left: 0px !important;
+  bottom: 0px;
+  position: fixed !important;
+  background: #fff;
+  max-height: 90vh;
+  display: inline-block;
+  padding: 0px !important;
+  margin: 0px !important;
+}
+
+.emiframe,.emiframe iframe{
+	z-index: 91474836477888 !important;
+	
+}
+
+emulator.inspector emcontent {
+  width: 100%;
+  height: 80%;
+  overflow: auto;
+  display: block;
+  position: relative;
+  padding-bottom: 160px;
+  padding-left: 2px;
+}
+
+emcontent pre:not(.emtext){
+	margin-bottom: 10px;
+	padding: 10px;
+	min-width: 93%;
+	display: inline-block;
+	position: relative;
+	
+}
+
+emcontent .log::before{
+	content: "log:\A";
+	color:#ccc;
+	position: -webkit-sticky; /* Safari */
+  position: sticky;
+  left:0;
+}
+emcontent .info::before{
+	content: "info:\A";
+	color: gray;
+	position: -webkit-sticky; /* Safari */
+  position: sticky;
+  left:0;
+}
+emcontent .error::before{
+	content: "error:\A";
+	color: red;
+	position: -webkit-sticky; /* Safari */
+  position: sticky;
+  left:0;
+}
+
+pre:not(.emtext):not(fcontainer pre){
+	outline: 1px solid #ccc;
+	padding: 5px; 
+	margin: 5px; 
+	margin-left: 0px;
+	width: 89px !important;
+	overflow: hidden;
+	overflow-x: auto;
+	display: inline-block
+	position: relative;
+}
+
+
+
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: gray }
+emulator.inspector emhandler {
+  width: 95%;
+  height: 30px;
+  position: relative
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-right: 10px;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.hidden{
+	display: none !important;
+}
+
+
+
+emi.selected {
+  color: red;
+}
+
+emname {
+  color: blue;
+  margin-left: 3px;
+}
+
+emvalue {
+  color: gray;
+}
+
+
+
+.emhidden {
+  display: none;
+}
+
+emtoggle {
+  position: absolute;
+  left: -10px;
+  top: 0px;
+  width: 12px;
+  height: 12px;
+  z-index: 888;
+  text-align: center;
+  border: 1px solid #ccc;
+  background: #000;
+  color: white;
+  border-radius: 10px;
+  display: none;
+}
+
+emtag {
+  margin-left: 10px;
+  padding-left: 10px;
+  margin-top: 10px;
+  clear: both;
+  display: block;
+  position: relative;
+  color: red;
+  min-width: 100%;
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.emtext {
+  color: #000;
+  display: inline;
+  clear: none;
+  white-space: nowrap;
+}
+
+emtag.readmode > emchild.childtxt >.emtext:not(pre),emtag.readmode >emattr >emvalue:not(pre){
+	white-space: break-spaces !important;
+}
+
+emtag.readmode >emattr:not(pre){
+	clear: left !important;
+	display: block !important;
+	position:relative !important;
+	width:100%;
+}
+
+.readmode.script, .readmode.style{
+	word-wrap: break-word !important;
+    white-space: break-spaces !important;
+    display: block !important;
+    padding-left: 5px;
+    overflow-x:auto;
+    position: relative;
+    position: relative;
+    overflow: hidden;
+    overflow: auto;
+    max-width: fit-content;
+    max-height: 100%;
+    clear: none;
+}
+
+
+
+
+.blur {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background: #000;
+  opacity: 0.8;
+  z-index: 100;
+  top: 0px;
+  left: 0px;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #FFF;
+  border-bottom-color: #000;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  position: absolute;
+
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+@media only screen and (max-width: 1024px) and (orientation : landscape) {
+  .dialog {
+    min-height: 90% !important;
+  }
+}
+
+.dialog {
+  position: fixed;
+  z-index: 101;
+  min-width: 80%;
+  min-height: 50%;
+  display: inline-block;
+  background-color: #fff;
+  top: 0;
+  left: 30%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  max-height: 60%;
+  max-width: 80%;
+}
+
+.dialog .title {
+  width: 100%;
+  height: 20px;
+  min-height: 20px;
+  display: inline-block;
+  font-size: 15px;
+  font-weight: bolder;
+  color: gray;
+  text-align: left;
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 2px;
+}
+
+.dialog .title button, .dialog .title a {
+  float: right;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  display: inline-block;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+  text-align: center;
+}
+
+.dialog .center {
+  display: block;
+  width: 90%;
+  height: 300px;
+  max-height: 99%;
+  overflow: hidden;
+  overflow-y: auto;
+  position: relative;
+  padding: 10px;
+}
+
+
+tabmenu {
+  width: 100%;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  height: 99%;
+}
+
+tabmenu content {
+  display: flex;
+  height: 90%;
+  max-height: 90%;
+  position: absolute;
+  width: 100%;
+  margin-top: 4px;
+  clear: both;
+  transition: left 1s;
+  
+}
+
+.disableTr{
+	transition: left 0s !important;
+}
+
+tabmenu> content >div{
+	flex:1;
+	height: 100%;
+	display: inline-block;
+	position: relative;
+	padding: 10px;
+	overflow: hidden;
+  overflow-y: auto;
+}
+
+tabmenu content>div >*{
+	position: relative;
+	display: block;
+}
+
+tabmenu tabcontainer {
+  height: 30px !important;
+  width: 100% !important;
+  display: flex !important;
+  position: relative !important;
+}
+
+tabmenu tabcontainer taba {
+  height: 20px !important;
+  min-width: 80px !important;
+  display: block !important;
+  border: 1px solid #ccc;
+  padding: 5px !important;
+  text-align: center;
+  font-size: 15px !important;
+
+}
+
+tabbtncontainer {
+  display: flex;
+  height: 40px;
+  width: 100%;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
+tabmenu taba.selected {
+  color: gray;
+  border-bottom: none !important;
+  font-weight: bold;
+}
+
+info,log,error {
+  width: 100%;
+  display: block;
+  position: relative;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+info {
+  color: blue;
+}
+
+log {
+  color: gray;
+}
+
+error {
+  color: red;
+}
+
+.blink {
+  background-color: yellow !important;
+  transition: background-color 1s !important;
+}
+
+fcontainer{
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    overflow-y: hidden;
+    padding-top: 10px;
+    flex-grow: 1;
+  flex-wrap: wrap;
+  
+}
+fcontainer >*{
+	display: inline-block;
+	border: 1px solid #ccc;
+	overflow: auto;
+	position: relative;
+	max-height: 94%;
+}
+
+fpanel{
+    width: 40%;
+    padding-bottom: 9px;
+}
+
+fpanel item:active, taba:active{
+	opacity: 0.3;
+}
+
+fpanel item {
+    padding: 5px;
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    min-height: 20px;
+    font-size: 14px;
+    border-bottom: 1px solid #ccc;
+}
+
+item.selected {
+	opacity: 0.4;
+}
+
+fcontainer pre{
+    width: 55% ;
+    padding: 5px;
+    overflow: auto;
+    margin-top: 0;
+    word-wrap: break-word ;
+    font-weight: bolder;
+}
+
+fcontainer pre img{
+	clear: both;
+	display: block;
+	max-width: 100%;
+}
+
+
+.emHighlight {
+    background: gray !important;
+  
+}
+
+.sticky{
+	display: flex;
+	position: -webkit-sticky; /* Safari */
+  position: sticky;
+  justify-items: flex-end;
+  justify-content: flex-end;
+  top:0px;
+	left:0;
+	width: 100%;
+}
+
+pre .sticky{
+	margin-top: -15px;
+}
+
+
+.gg-copy:active{
+	opacity: 0.3;
+}
+.gg-copy {
+	padding: 0 !important;
+    box-sizing: border-box;
+    position: relative;
+    display: block;
+    transform: scale(var(--ggs,1));
+    width: 14px;
+    height: 18px;
+    border: 2px solid !important;
+    margin-left: -5px;
+    margin-top: -4px;
+    z-index: 6;
+  }
+  .gg-copy::after,
+  .gg-copy::before {
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute
+  }
+  .gg-copy::before {
+    background:
+        linear-gradient( to left,
+            currentColor 5px, transparent 0)
+            no-repeat right top/5px 2px,
+        linear-gradient( to left,
+            currentColor 5px, transparent 0)
+            no-repeat left bottom/ 2px 5px;
+    box-shadow: inset -4px -4px 0 -2px;
+    bottom: -6px;
+    right: -6px;
+    width: 14px;
+    height: 18px
+  }
+  .gg-copy::after {
+    width: 6px;
+    height: 2px;
+    background: currentColor;
+    left: 2px;
+    top: 2px;
+    box-shadow: 0 4px 0,0 8px 0
+  }
+  .download{
+  	background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pjxzdmcgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48ZyBkYXRhLW5hbWU9IjEiIGlkPSJfMSI+PHBhdGggZD0iTTM1Ny41MSwzMjJIMzAxLjc1YTE1LDE1LDAsMCwxLDAtMzBoNTUuNzZhNzAuMTMsNzAuMTMsMCwwLDAsMC0xNDAuMjVjLTEuODksMC0zLjkuMDktNi4xNC4yOWExNSwxNSwwLDAsMS0xNC4yNS03LjQyLDk4LjE3LDk4LjE3LDAsMCwwLTE4MS42OCwzMi42LDE1LDE1LDAsMCwxLTE1LjM1LDEyLjQ3bC0xLjA2LDBBNTEuMTcsNTEuMTcsMCwxLDAsMTM5LDI5Mmg3NC43MWExNSwxNSwwLDAsMSwwLDMwSDEzOWE4MS4xOCw4MS4xOCwwLDAsMS0xMC41Ni0xNjEuNjYsMTI4LjE3LDEyOC4xNywwLDAsMSwyMjkuNjctMzguNTlBMTAwLjEzLDEwMC4xMywwLDAsMSwzNTcuNTEsMzIyWiIvPjxwYXRoIGQ9Ik0zMDUuOTIsMjY2LjEyYTE0Ljk0LDE0Ljk0LDAsMCwxLTEwLjYtNC40bC0zNy41OC0zNy41Ny0zNy41NywzNy41N0ExNSwxNSwwLDAsMSwxOTksMjQwLjUxbDQ4LjE4LTQ4LjE4YTE1LDE1LDAsMCwxLDIxLjIxLDBsNDguMTgsNDguMThhMTUsMTUsMCwwLDEtMTAuNjEsMjUuNjFaIi8+PHBhdGggZD0iTTI1Ny43NCwzODIuNjlhMTUsMTUsMCwwLDEtMTUtMTVWMjAyLjk0YTE1LDE1LDAsMCwxLDMwLDBWMzY3LjY5QTE1LDE1LDAsMCwxLDI1Ny43NCwzODIuNjlaIi8+PC9nPjwvc3ZnPg==');
+  }
+  
+  .update{
+  	display: flex;
+  	justify-content: center;
+  	align-items: center;
+  	font-size: 15px !important;
+  	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC0klEQVR4nKWWz09TQRDHi2f1X/HXH+BN3sNIjBoRSTx4MCB60MSYeKCAiHr1gD+i7lYQBNxtKVAQC9RAqmJCFANBUaEIpS1IVSiF0r4xs40vtLzdCk6yabM7b759M5/Zqc2WywDyDlPnAZ2wco3yap3we/ipOdj5/Mdsv+1/TKv37NYpq9IID+iUg2yJc8IqCx+6dm1NgLASnfKIKrievQgP51NenDO43W7foVF2e0vBafZiNzGO/A1yCBQ3d0K5uxeOPHEphTTCalUpsnzodLMH/IEgGJC2n/FVuNH/VpE6ZmiEncoQwKJplIWsHjj+1A2B6G9YWkvAg6ERqOz1w5vpOTAMA2p9CiHKIwiPKYIUyZxdY18glliHc86X5l4B5dD/7TssryWgqKlDnjbK7WkFgDydsmmZ41n2Akpd3k37RU0dsJ5KgWN4VCUyhfFtotG2SdLr6SB8ml9U+hQQ514bdq7KqWciABVef8be4NQsZFvSMAR9Fv1TivWokQnYvX4RYCEWhxON7eZ+WZtXpGqjOUcnZCmrtumE1cmomo+tmEHax79mnDd+GDfPIssxONbgluFch/1x3eoQg240RPZK1yvzvLDeJdBGQ6zlKWdVljVBcqLxVdEbGHwtmRTfB6ZmMvwue3wCcSUgWBO8rlVOH0ML8D4Y2RZ9OuVw6BHb87cZJ2VO94dGIGUYcKa1a9PZpU4fXHD3qfvE7HjCKmWOCMDiShzezYQyLsaL7X2wup4ELqFKiBBeYYocbGnZKbu7cF3rGYREMgVj4R9wxz8Mz0bGRZ0mFqJwtKFNVovwpkGGA0eV26vdAzD7a0nQhALdnyczeicLW6OA8pOW171O+K1chSxp9gh81X6sRjkZcbLhL9kWTUTMkVrlZDTfyPG8SFUj3ZqkOWmKZJaGgdsRwxypmUSK0H9LAtmmOVr3aZSXib9IlN1Nf/IycY3/g/0BWlhFI0kv+jgAAAAASUVORK5CYII=');
+  }
+  
+  emi:active,.download:active,.update:active{
+  	opacity: 0.3 !important;
+  }
+  
+  emulator.inspector emi ,.download,.update{
+  display: block;
+  position: relative;
+  padding: 5px;
+  padding-top: 1px;
+  text-align: center;
+  border: 1px solid gray;
+  font-size: 18px;
+  font-weight: bold;
+  width: 25px !important;
+  min-height: 25px !important;
+  margin: 3px !important;
+  max-height: 80%;
+  border-radius: 5px;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 100;
+}
+  
+  .emuSearch{
+  	position: absolute;
+  	left: 5px;
+  	height: 35px;
+  	display: flex;
+  	width: 60%;
+  	clear: both;
+  	align-items: center;
+  	overflow: hidden;
+  	padding-left: 2px;
+  }
+  .emuSearch >*{
+  	flex 0 0 auto;
+  }
+  .emuSearch input{
+  	height: 30px;
+  	display: block;
+  	position: relative;
+  	width: 50% !important;
+  
+  }
+  .emuSearch span:active{
+  	opacity: 0.3;
+  }
+  .emuSearch span{
+  	font-size: 35px;
+  	font-weight: bold;
+  	position: relative;
+  	top:-8px;
+  	user-select: none;
+  	webkit-user-select: none;
+  }
+  
+  .fetchError{
+  	background: red;
+  	color: white;
+  }
